@@ -1,10 +1,10 @@
 {
+  "name": "bbc.js",
   "version": "0.1.0",
   "description": "a tiny, flexible BBC parser",
   "license": "MIT",
-  "author": "Kingdaro <kingdaro@gmail.com> (http://kingdaro.net)",
-  "main": "main.js",
-  "name": "bbc.js",
+  "author": "just-nobody",
+  "main": "dist/index.js",
   "devDependencies": {
     "babel-preset-latest": "^6.16.0",
     "babel-register": "^6.16.3",
