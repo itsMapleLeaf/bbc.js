@@ -4,7 +4,7 @@
   "description": "a tiny, flexible BBC parser",
   "license": "MIT",
   "author": "just-nobody",
-  "main": "dist/index.js",
+  "main": "dist/bbc.js",
   "devDependencies": {
     "babel-preset-latest": "^6.16.0",
     "babel-register": "^6.16.3",
