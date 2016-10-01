@@ -13,14 +13,21 @@ function parser(tags = defaultTags) {
     .map(tag => `\\[${tag}(?:=.*?)?]|\\[\\/${tag}]`)
     .join('|'))
 
+  const tagExpressions = {}
+  Object.keys(tags).map(tag => {
+    tagExpressions[tag] = {
+      startexp: new RegExp(`\\[${tag}(?:=(.*?))?]`, 'i'),
+      endexp: new RegExp(`\\[\\/${tag}]`, 'i'),
+    }
+  })
+
   return input => {
     const regions = input.split(nobbcExp)
 
     for (let i = 0; i < regions.length; i += 2) {
       for (const tag in tags) {
-        const startexp = new RegExp(`\\[${tag}(?:=(.*?))?]`, 'i')
-        const endexp = new RegExp(`\\[\\/${tag}]`, 'i')
         const { start = '', end = '' } = tags[tag]
+        const { startexp, endexp } = tagExpressions[tag]
         while (startexp.test(regions[i]) && endexp.test(regions[i])) {
           regions[i] = regions[i].replace(startexp, start).replace(endexp, end)
         }
