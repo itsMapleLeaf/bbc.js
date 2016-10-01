@@ -32,4 +32,3 @@ function parser(tags = defaultTags) {
 }
 
 export { parser }
-export default parser

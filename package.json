@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "description": "a node.js app",
+  "description": "a tiny, flexible BBC parser",
   "license": "MIT",
   "author": "Kingdaro <kingdaro@gmail.com> (http://kingdaro.net)",
   "main": "main.js",
@@ -9,14 +9,11 @@
     "babel-preset-latest": "^6.16.0",
     "babel-register": "^6.16.3",
     "chai": "^3.5.0",
-    "mocha": "^3.1.0"
+    "mocha": "^3.1.0",
+    "rollup": "^0.36.1",
+    "rollup-plugin-babel": "^2.6.1"
   },
   "scripts": {
     "test": "mocha test --compilers js:babel-register"
-  },
-  "babel": {
-    "presets": [
-      "latest"
-    ]
   }
 }
