@@ -9,7 +9,7 @@ var defaultTags = {
       return '<a href="' + url + '">';
     }, end: '</a>' },
   color: { start: function start(_, color) {
-      return '<span style="color: ' + color + '"></span>';
+      return '<span style="color: ' + color + '">';
     }, end: '</span>' },
   nobbc: { nobbc: true }
 };
@@ -24,7 +24,7 @@ function parser() {
   }).join('|'));
 
   var tagExpressions = {};
-  Object.keys(tags).map(function (tag) {
+  Object.keys(tags).forEach(function (tag) {
     tagExpressions[tag] = {
       startexp: new RegExp('\\[' + tag + '(?:=(.*?))?]', 'i'),
       endexp: new RegExp('\\[\\/' + tag + ']', 'i')

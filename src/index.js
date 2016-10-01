@@ -3,7 +3,7 @@ const defaultTags = {
   i: { start: '<em>', end: '</em>' },
   u: { start: '<u>', end: '</u>' },
   url: { start: (_, url) => `<a href="${url}">`, end: '</a>' },
-  color: { start: (_, color) => `<span style="color: ${color}"></span>`, end: '</span>' },
+  color: { start: (_, color) => `<span style="color: ${color}">`, end: '</span>' },
   nobbc: { nobbc: true },
 }
 
@@ -14,7 +14,7 @@ function parser(tags = defaultTags) {
     .join('|'))
 
   const tagExpressions = {}
-  Object.keys(tags).map(tag => {
+  Object.keys(tags).forEach(tag => {
     tagExpressions[tag] = {
       startexp: new RegExp(`\\[${tag}(?:=(.*?))?]`, 'i'),
       endexp: new RegExp(`\\[\\/${tag}]`, 'i'),
