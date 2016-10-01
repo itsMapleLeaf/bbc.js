@@ -11,9 +11,12 @@
     "chai": "^3.5.0",
     "mocha": "^3.1.0",
     "rollup": "^0.36.1",
-    "rollup-plugin-babel": "^2.6.1"
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-watch": "^2.5.0"
   },
   "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
     "test": "mocha test --compilers js:babel-register"
   }
 }
