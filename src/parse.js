@@ -54,7 +54,7 @@ function createTree(tokens, pos = 0, nodes = [], currentTag) {
   return createTree(tokens, pos + 1, nodes.concat([ node ]), currentTag)
 }
 
-function renderNode(node, tags) {
+export function renderNode(node, tags) {
   const { type } = node
   if (type === 'text') {
     return node.text
@@ -72,8 +72,4 @@ function renderNode(node, tags) {
 export function parse(source) {
   const tokens = parseTokens(source)
   return createTree(tokens)
-}
-
-export function render(tree, tags) {
-  return renderNode(tree, tags)
 }

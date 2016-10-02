@@ -1,4 +1,4 @@
-import {parse, render} from './parse'
+import {parse, renderNode} from './parse'
 
 const defaultTags = {
   b: { render: text => `<span class="bbc-b" style="font-weight: bold">${text}</span>` },
@@ -27,7 +27,7 @@ export function createParser(tags = defaultTags) {
 }
 
 export function toHTML(source, tags = defaultTags) {
-  return render(source, tags)
+  return renderNode(source, tags)
 }
 
 export function toTree(source) {
