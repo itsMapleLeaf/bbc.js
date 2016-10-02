@@ -31,4 +31,7 @@ describe('parser', () => {
       '[url=http://google.com]hi mom[/url] <span class="bbc-u" style="text-decoration: underline">hi dad</span>'
     )
   })
+
+  // TODO: test treegen
+  // TODO: test custom tags
 })
