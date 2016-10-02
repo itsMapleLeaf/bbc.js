@@ -3,7 +3,7 @@ import babel from 'rollup-plugin-babel'
 export default {
   entry: 'src/index.js',
   dest: 'dist/bbc.js',
-  format: 'iife',
+  format: 'umd',
   moduleName: 'BBC',
   plugins: [
     babel({
@@ -12,10 +12,11 @@ export default {
           es2015: { modules: false },
         }],
       ],
-      modules: [
+      plugins: [
         'transform-object-rest-spread',
         'transform-flow-strip-types',
       ],
+      babelrc: false,
     }),
   ],
 }
