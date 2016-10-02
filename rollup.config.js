@@ -5,5 +5,16 @@ export default {
   dest: 'dist/bbc.js',
   format: 'iife',
   moduleName: 'BBC',
-  plugins: [ babel() ],
+  plugins: [
+    babel({
+      presets: [
+        ['latest', {
+          es2015: { modules: false },
+        }],
+      ],
+      modules: [
+        'transform-object-rest-spread',
+      ],
+    }),
+  ],
 }
