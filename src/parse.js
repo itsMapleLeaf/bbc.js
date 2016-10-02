@@ -35,13 +35,15 @@ function createTree(tokens, pos = 0, nodes = [], currentTag) {
     if (content) {
       const tail = content.nodes[content.nodes.length - 1]
       const end = tail ? tail.end : token.end
-      const node = { type: 'tag', name, content }
-      return createTree(tokens, content.endPosition + 1, nodes.concat([ node ]), currentTag)
+      const text = token.text + content.text
+      const node = { type: 'tag', name, content, text }
+      return createTree(tokens, content.end + 1, nodes.concat([ node ]), currentTag)
     }
   }
   if (token.type === 'close-tag') {
     if (token.name === currentTag) {
-      return { type: 'content', nodes, endPosition: pos }
+      const text = nodes.map(node => node.text).join('') + token.text
+      return { type: 'content', nodes, text, end: pos }
     }
   }
 
@@ -50,13 +52,14 @@ function createTree(tokens, pos = 0, nodes = [], currentTag) {
   return createTree(tokens, pos + 1, nodes.concat([ node ]), currentTag)
 }
 
-function renderNode(node) {
+function renderNode(node, tags) {
   const { type } = node
   if (type === 'text') {
     return node.text
   }
   else if (node.type === 'tag') {
-    return `<${node.name}>${renderNode(node.content)}</${node.name}>`
+    const renderer = tags[node.name]
+    return renderer ? renderer(node.content, node.attr) : node.text
   }
   else if (type === 'content' || type === 'tree') {
     return node.nodes.map(renderNode).join('')
