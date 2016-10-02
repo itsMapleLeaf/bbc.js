@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import * as bbc from '../src'
 
 describe('parser', () => {
-  const parse = bbc.parser()
+  const parse = bbc.createParser()
 
   it('parses bbc', () => {
     expect(parse('[b]hello[/b] [i]world[/i]')).to.equal(`<strong>hello</strong> <em>world</em>`)
