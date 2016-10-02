@@ -1,5 +1,7 @@
 import {newTokenMatcher} from './util'
 
+const identity = value => value
+
 const parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, (name, attr) => ({ name, attr }))
 const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-z]+?)]/i, name => ({ name }))
 const parseText = newTokenMatcher('text', /(\[*[^\[]+)/i, () => ({}))
@@ -58,8 +60,9 @@ function renderNode(node, tags) {
     return node.text
   }
   else if (node.type === 'tag') {
-    const renderer = tags[node.name]
-    return renderer ? renderer(node.content, node.attr) : node.text
+    const { render = identity, recursive = true } = tags[node.name]
+    const content = recursive ? node.text : renderNode(node.content, tags)
+    return render(content)
   }
   else if (type === 'content' || type === 'tree') {
     return node.nodes.map(renderNode).join('')
@@ -71,6 +74,6 @@ export function parse(source) {
   return createTree(tokens)
 }
 
-export function render(tree) {
-  return renderNode(tree)
+export function render(tree, tags) {
+  return renderNode(tree, tags)
 }
