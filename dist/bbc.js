@@ -58,7 +58,7 @@ function parseTokens(source) {
   }
 }
 
-function createTree$1(tokens) {
+function createTree(tokens) {
   var pos = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   var nodes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
   var currentTag = arguments[3];
@@ -72,33 +72,38 @@ function createTree$1(tokens) {
     var name = token.name;
     var start = token.start;
 
-    var content = createTree$1(tokens, pos + 1, [], name);
+    var content = createTree(tokens, pos + 1, [], name);
 
     if (content) {
       var tail = content.nodes[content.nodes.length - 1];
       var end = tail ? tail.end : token.end;
-      var _node = { type: 'tag', name: name, content: content };
-      return createTree$1(tokens, content.endPosition + 1, nodes.concat([_node]), currentTag);
+      var text = token.text + content.text;
+      var _node = { type: 'tag', name: name, content: content, text: text };
+      return createTree(tokens, content.end + 1, nodes.concat([_node]), currentTag);
     }
   }
   if (token.type === 'close-tag') {
     if (token.name === currentTag) {
-      return { type: 'content', nodes: nodes, endPosition: pos };
+      var _text = nodes.map(function (node) {
+        return node.text;
+      }).join('') + token.text;
+      return { type: 'content', nodes: nodes, text: _text, end: pos };
     }
   }
 
   // render as a text node if other cases failed
   var node = { type: 'text', text: token.text };
-  return createTree$1(tokens, pos + 1, nodes.concat([node]), currentTag);
+  return createTree(tokens, pos + 1, nodes.concat([node]), currentTag);
 }
 
-function renderNode(node) {
+function renderNode(node, tags) {
   var type = node.type;
 
   if (type === 'text') {
     return node.text;
   } else if (node.type === 'tag') {
-    return '<' + node.name + '>' + renderNode(node.content) + '</' + node.name + '>';
+    var renderer = tags[node.name];
+    return renderer ? renderer(node.content, node.attr) : node.text;
   } else if (type === 'content' || type === 'tree') {
     return node.nodes.map(renderNode).join('');
   }
@@ -106,22 +111,29 @@ function renderNode(node) {
 
 function parse(source) {
   var tokens = parseTokens(source);
-  return createTree$1(tokens);
+  return createTree(tokens);
 }
 
 function render(tree) {
   return renderNode(tree);
 }
 
-function toHTML(source) {
-  return render(source);
+function createParser(tags) {
+  return function (source) {
+    return toHTML(source, tags);
+  };
 }
 
-function createTree(source) {
+function toHTML(source, tags) {
+  return render(source, tags);
+}
+
+function toTree(source) {
   return parse(source);
 }
 
+exports.createParser = createParser;
 exports.toHTML = toHTML;
-exports.createTree = createTree;
+exports.toTree = toTree;
 
 }((this.BBC = this.BBC || {})));
