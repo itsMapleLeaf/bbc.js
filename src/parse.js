@@ -1,4 +1,5 @@
 import {newTokenMatcher} from './util'
+import type {Token, Node, ContentNode, TagDefinition} from './types'
 
 const identity = value => value
 
@@ -6,25 +7,23 @@ const parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, (na
 const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-z]+?)]/i, name => ({ name }))
 const parseText = newTokenMatcher('text', /(\[*[^\[]+)/i, () => ({}))
 
-function parseToken(input, position) {
-  return parseOpenTag(input, position)
+function parseToken(input: string, position: number): ?Token {
+  const token = parseOpenTag(input, position)
     || parseCloseTag(input, position)
     || parseText(input, position)
+  if (token) return token
+  else throw new Error('we fucked up')
 }
 
-function parseTokens(source, position = 0, tokens = []) {
+function parseTokens(source: string, position = 0, tokens = []): Token[] {
   if (position >= input.length - 1) {
     return tokens
   }
   const token = parseToken(source, position)
-  if (token) {
-    return getTokensFromSource(source, token.end, tokens.concat([token]))
-  } else {
-    throw new Error('we fucked up')
-  }
+  return parseTokens(source, token.end, tokens.concat([token]))
 }
 
-function createTree(tokens, pos = 0, nodes = [], currentTag) {
+function createTree(tokens: Token[], pos = 0, nodes = [], currentTag?: string): Node {
   if (pos >= tokens.length) {
     return { type: 'tree', nodes }
   }
@@ -32,11 +31,9 @@ function createTree(tokens, pos = 0, nodes = [], currentTag) {
   const token = tokens[pos]
   if (token.type === 'open-tag') {
     const { name, start } = token
-    const content = createTree(tokens, pos + 1, [], name)
+    const content: ContentNode = createTree(tokens, pos + 1, [], name)
 
     if (content) {
-      const tail = content.nodes[content.nodes.length - 1]
-      const end = tail ? tail.end : token.end
       const text = token.text + content.text
       const node = { type: 'tag', name, content, text }
       return createTree(tokens, content.end + 1, nodes.concat([ node ]), currentTag)
@@ -54,14 +51,14 @@ function createTree(tokens, pos = 0, nodes = [], currentTag) {
   return createTree(tokens, pos + 1, nodes.concat([ node ]), currentTag)
 }
 
-export function renderNode(node, tags) {
+export function renderNode(node: Node, tags: TagDefinition): string {
   const { type } = node
   if (type === 'text') {
     return node.text
   }
   else if (node.type === 'tag') {
     const { render = identity, deep = true } = tags[node.name]
-    const content = deep ? node.text : renderNode(node.content, tags)
+    const content = deep ? renderNode(node.content, tags) : node.text
     return render(content)
   }
   else if (type === 'content' || type === 'tree') {
@@ -69,7 +66,7 @@ export function renderNode(node, tags) {
   }
 }
 
-export function parse(source) {
+export function parse(source: string): Node {
   const tokens = parseTokens(source)
   return createTree(tokens)
 }

@@ -14,6 +14,7 @@ export default {
       ],
       modules: [
         'transform-object-rest-spread',
+        'transform-flow-strip-types',
       ],
     }),
   ],

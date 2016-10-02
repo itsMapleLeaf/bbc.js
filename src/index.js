@@ -20,16 +20,16 @@ const defaultTags = {
   },
 }
 
-export function createParser(tags = defaultTags) {
+export function createParser(tags: TagDefinition = defaultTags) {
   return source => {
     return toHTML(source, tags)
   }
 }
 
-export function toHTML(source, tags = defaultTags) {
+export function toHTML(source: string, tags: TagDefinition = defaultTags) {
   return renderNode(source, tags)
 }
 
-export function toTree(source) {
+export function toTree(source: string) {
   return parse(source)
 }
