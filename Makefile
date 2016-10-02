@@ -4,5 +4,5 @@ build:
 watch:
 	rollup -c -w
 
-test:
+tests:
 	mocha test --compilers js:babel-register
