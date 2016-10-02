@@ -60,8 +60,8 @@ export function renderNode(node, tags) {
     return node.text
   }
   else if (node.type === 'tag') {
-    const { render = identity, recursive = true } = tags[node.name]
-    const content = recursive ? node.text : renderNode(node.content, tags)
+    const { render = identity, deep = true } = tags[node.name]
+    const content = deep ? node.text : renderNode(node.content, tags)
     return render(content)
   }
   else if (type === 'content' || type === 'tree') {

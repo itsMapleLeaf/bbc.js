@@ -12,11 +12,11 @@ const defaultTags = {
   },
   url: {
     render: (text, url = text) => `<a class="bbc-url" href="${url}">${text}</a>`,
-    recursive: false,
+    deep: false,
   },
   nobbc: {
     render: text => text,
-    recursive: false,
+    deep: false,
   },
 }
 
