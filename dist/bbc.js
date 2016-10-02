@@ -1,13 +1,11 @@
-(function () {
+(function (exports) {
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _util = require('util');
-
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function stickyMatcher(pattern) {
+function newStickyMatcher(pattern) {
   var exp = new RegExp(pattern, 'y');
   return function (input, pos) {
     exp.lastIndex = pos;
@@ -15,8 +13,8 @@ function stickyMatcher(pattern) {
   };
 }
 
-function tokenMatcher(type, pattern, predicate) {
-  var getMatch = stickyMatcher(pattern);
+function newTokenMatcher(type, pattern, predicate) {
+  var getMatch = newStickyMatcher(pattern);
   return function (input, position) {
     var match = getMatch(input, position);
     if (match) {
@@ -31,36 +29,36 @@ function tokenMatcher(type, pattern, predicate) {
   };
 }
 
-var getOpenTag = tokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, function (name, attr) {
+var parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, function (name, attr) {
   return { name: name, attr: attr };
 });
-var getCloseTag = tokenMatcher('close-tag', /\[\/([a-z]+?)]/i, function (name) {
+var parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-z]+?)]/i, function (name) {
   return { name: name };
 });
-var getText = tokenMatcher('text', /(\[*[^\[]+)/i, function () {
+var parseText = newTokenMatcher('text', /(\[*[^\[]+)/i, function () {
   return {};
 });
 
-function getToken(input, position) {
-  return getOpenTag(input, position) || getCloseTag(input, position) || getText(input, position);
+function parseToken(input, position) {
+  return parseOpenTag(input, position) || parseCloseTag(input, position) || parseText(input, position);
 }
 
-function getTokens(input) {
+function parseTokens(source) {
   var position = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   var tokens = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
   if (position >= input.length - 1) {
     return tokens;
   }
-  var token = getToken(input, position);
+  var token = parseToken(source, position);
   if (token) {
-    return getTokens(input, token.end, tokens.concat([token]));
+    return getTokensFromSource(source, token.end, tokens.concat([token]));
   } else {
     throw new Error('we fucked up');
   }
 }
 
-function createNode(tokens) {
+function createTree$1(tokens) {
   var pos = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   var nodes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
   var currentTag = arguments[3];
@@ -74,13 +72,13 @@ function createNode(tokens) {
     var name = token.name;
     var start = token.start;
 
-    var content = createNode(tokens, pos + 1, [], name);
+    var content = createTree$1(tokens, pos + 1, [], name);
 
     if (content) {
       var tail = content.nodes[content.nodes.length - 1];
       var end = tail ? tail.end : token.end;
       var _node = { type: 'tag', name: name, content: content };
-      return createNode(tokens, content.endPosition + 1, nodes.concat([_node]), currentTag);
+      return createTree$1(tokens, content.endPosition + 1, nodes.concat([_node]), currentTag);
     }
   }
   if (token.type === 'close-tag') {
@@ -91,7 +89,7 @@ function createNode(tokens) {
 
   // render as a text node if other cases failed
   var node = { type: 'text', text: token.text };
-  return createNode(tokens, pos + 1, nodes.concat([node]), currentTag);
+  return createTree$1(tokens, pos + 1, nodes.concat([node]), currentTag);
 }
 
 function renderNode(node) {
@@ -106,14 +104,24 @@ function renderNode(node) {
   }
 }
 
-var tokens = getTokens('\n  [b]some bold text[/b]\n  [i]some italics[/i]\n  [color=red]\n    i am red\n    [color=green]i am green[/color]\n  [/color]\n  [url=http://www.google.com]go to google[/url]\n');
+function parse(source) {
+  var tokens = parseTokens(source);
+  return createTree$1(tokens);
+}
 
-var tree = createNode(tokens);
+function render(tree) {
+  return renderNode(tree);
+}
 
-var output = renderNode(tree);
+function toHTML(source) {
+  return render(source);
+}
 
-// console.log(tokens)
-// console.log(inspect(tree, { depth: null }))
-console.log(output);
+function createTree(source) {
+  return parse(source);
+}
 
-}());
+exports.toHTML = toHTML;
+exports.createTree = createTree;
+
+}((this.BBC = this.BBC || {})));
