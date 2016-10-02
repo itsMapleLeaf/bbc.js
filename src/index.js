@@ -45,51 +45,45 @@ function getTokens(input, position = 0, tokens = []) {
   }
 }
 
-function createNodeList(tokens, pos = 0, nodes = [], currentTag) {
-  if (pos >= tokens.length - 1) {
-    return nodes
+function createNode(tokens, pos = 0, nodes = [], currentTag) {
+  if (pos >= tokens.length) {
+    return { type: 'tree', nodes }
   }
 
   const token = tokens[pos]
-  if (token.type === 'text') {
-    const node = { ...token }
-    return createNodeList(tokens, pos + 1, nodes.concat([ node ]), currentTag)
-  }
   if (token.type === 'open-tag') {
-    const children = createNodeList(tokens, pos + 1, [], token.name)
-
     const { name, start } = token
-    const tail = children[children.length - 1]
-    const end = tail ? tail.end : token.end
-    const node = { type: 'tag', name, children, start, end }
+    const content = createNode(tokens, pos + 1, [], name)
 
-    return createNodeList(tokens, pos + children.length + 2, nodes.concat([ node ]), currentTag)
+    if (content) {
+      const tail = content.nodes[content.nodes.length - 1]
+      const end = tail ? tail.end : token.end
+      const node = { type: 'tag', name, content }
+      return createNode(tokens, content.endPosition + 1, nodes.concat([ node ]), currentTag)
+    }
   }
   if (token.type === 'close-tag') {
     if (token.name === currentTag) {
-      return nodes
-    }
-    else {
-      const { text, start, end } = token
-      const node = { type: 'text', text, start, end }
-      return createNodeList(tokens, pos + 1, nodes.concat([ node ]), currentTag)
+      return { type: 'content', nodes, endPosition: pos }
     }
   }
+
+  // render as a text node if other cases failed
+  const node = { type: 'text', text: token.text }
+  return createNode(tokens, pos + 1, nodes.concat([ node ]), currentTag)
 }
 
 function renderNode(node) {
-  const { type, text, name, children } = node
+  const { type } = node
   if (type === 'text') {
-    return text
+    return node.text
   }
-  else if (type === 'tag') {
-    const content = renderNodeList(children)
-    return `<${name}>${content}</${name}>`
+  else if (node.type === 'tag') {
+    return `<${node.name}>${renderNode(node.content)}</${node.name}>`
   }
-}
-
-function renderNodeList(nodes) {
-  return nodes.map(renderNode).join('')
+  else if (type === 'content' || type === 'tree') {
+    return node.nodes.map(renderNode).join('')
+  }
 }
 
 const tokens = getTokens(`
@@ -102,10 +96,10 @@ const tokens = getTokens(`
   [url=http://www.google.com]go to google[/url]
 `)
 
-const tree = createNodeList(tokens)
+const tree = createNode(tokens)
 
-const output = renderNodeList(tree)
+const output = renderNode(tree)
 
 // console.log(tokens)
-console.log(inspect(tree, { depth: null }))
-// console.log(output)
+// console.log(inspect(tree, { depth: null }))
+console.log(output)
