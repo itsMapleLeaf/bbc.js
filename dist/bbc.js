@@ -29,6 +29,10 @@ function newTokenMatcher(type, pattern, predicate) {
   };
 }
 
+var identity = function identity(value) {
+  return value;
+};
+
 var parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, function (name, attr) {
   return { name: name, attr: attr };
 });
@@ -102,8 +106,16 @@ function renderNode(node, tags) {
   if (type === 'text') {
     return node.text;
   } else if (node.type === 'tag') {
-    var renderer = tags[node.name];
-    return renderer ? renderer(node.content, node.attr) : node.text;
+    var _tags$node$name = tags[node.name];
+    var _tags$node$name$rende = _tags$node$name.render;
+
+    var _render = _tags$node$name$rende === undefined ? identity : _tags$node$name$rende;
+
+    var _tags$node$name$recur = _tags$node$name.recursive;
+    var recursive = _tags$node$name$recur === undefined ? true : _tags$node$name$recur;
+
+    var content = recursive ? node.text : renderNode(node.content, tags);
+    return _render(content);
   } else if (type === 'content' || type === 'tree') {
     return node.nodes.map(renderNode).join('');
   }
@@ -114,17 +126,54 @@ function parse(source) {
   return createTree(tokens);
 }
 
-function render(tree) {
-  return renderNode(tree);
+function render(tree, tags) {
+  return renderNode(tree, tags);
 }
 
-function createParser(tags) {
+var defaultTags = {
+  b: { render: function render(text) {
+      return '<span class="bbc-b" style="font-weight: bold">' + text + '</span>';
+    } },
+  i: { render: function render(text) {
+      return '<span class="bbc-i" style="font-style: italic">' + text + '</span>';
+    } },
+  u: { render: function render(text) {
+      return '<span class="bbc-u" style="text-decoration: underline">' + text + '</span>';
+    } },
+  s: { render: function render(text) {
+      return '<span class="bbc-s" style="text-decoration: line-through">' + text + '</span>';
+    } },
+  color: {
+    render: function render(text, color) {
+      return '<span class="bbc-color bbc-color-' + color + '" style="color: ' + color + '">' + text + '</span>';
+    }
+  },
+  url: {
+    render: function render(text) {
+      var url = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : text;
+      return '<a class="bbc-url" href="' + url + '">' + text + '</a>';
+    },
+    recursive: false
+  },
+  nobbc: {
+    render: function render(text) {
+      return text;
+    },
+    recursive: false
+  }
+};
+
+function createParser() {
+  var tags = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultTags;
+
   return function (source) {
     return toHTML(source, tags);
   };
 }
 
-function toHTML(source, tags) {
+function toHTML(source) {
+  var tags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultTags;
+
   return render(source, tags);
 }
 
