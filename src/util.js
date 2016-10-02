@@ -1,3 +1,4 @@
+// @flow
 import type {StickyMatcher, TokenMatcher, TokenMatcherPredicate} from './types'
 
 export function newStickyMatcher(pattern: string | RegExp): StickyMatcher {

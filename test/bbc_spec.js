@@ -1,24 +1,34 @@
 import {expect} from 'chai'
-import * as bbc from '../src'
+import {createParser} from '../src'
 
+const parse = createParser()
+
+function compare(input, output) {
+  expect(parse(input)).to.equal(output)
+}
+
+/* eslint no-undef: off */
 describe('parser', () => {
-  const parse = bbc.createParser()
-
   it('parses bbc', () => {
-    expect(parse('[b]hello[/b] [i]world[/i]')).to.equal(`<strong>hello</strong> <em>world</em>`)
+    compare('[b]hello[/b]', '<span class="bbc-b" style="font-weight: bold">hello</span>')
+    compare('[i]world[/i]', '<span class="bbc-i" style="font-style: italic">world</span>')
   })
 
   it('parses complex bbc w/ params', () => {
-    expect(parse('[url=http://google.com]test[/url]')).to.equal(`<a href="http://google.com">test</a>`)
+    compare('[url=http://google.com]test[/url]', '<a class="bbc-url" href="http://google.com">test</a>')
   })
 
   it('supports nesting', () => {
-    expect(parse('[color=red]foo [color=blue]bar[/color] [color=green]foobar[/color][/color]'))
-      .to.equal(`<span style="color: red"></span>foo <span style="color: blue"></span>bar</span> <span style="color: green"></span>foobar</span></span>`)
+    compare(
+      '[color=red]foo [color=blue]bar[/color] [color=green]foobar[/color][/color]',
+      '<span class="bbc-color bbc-color-red" style="color: red">foo <span class="bbc-color bbc-color-blue" style="color: blue">bar</span> <span class="bbc-color bbc-color-green" style="color: green">foobar</span></span>'
+    )
   })
 
   it('supports nobbc', () => {
-    expect(parse('[nobbc][url=http://google.com]hi mom[/url][/nobbc] [u]hi dad[/u]'))
-      .to.equal('[url=http://google.com]hi mom[/url] <u>hi dad</u>')
+    compare(
+      '[nobbc][url=http://google.com]hi mom[/url][/nobbc] [u]hi dad[/u]',
+      '[url=http://google.com]hi mom[/url] <span class="bbc-u" style="text-decoration: underline">hi dad</span>'
+    )
   })
 })

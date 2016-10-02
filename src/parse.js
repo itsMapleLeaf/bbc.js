@@ -1,5 +1,6 @@
-import {newTokenMatcher} from './util'
+// @flow
 import type {Token, Node, ContentNode, TagDefinition} from './types'
+import {newTokenMatcher} from './util'
 
 const identity = value => value
 
@@ -7,16 +8,15 @@ const parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, (na
 const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-z]+?)]/i, name => ({ name }))
 const parseText = newTokenMatcher('text', /(\[*[^\[]+)/i, () => ({}))
 
-function parseToken(input: string, position: number): ?Token {
+function parseToken(input: string, position: number): Token {
   const token = parseOpenTag(input, position)
     || parseCloseTag(input, position)
     || parseText(input, position)
-  if (token) return token
-  else throw new Error('we fucked up')
+  return token
 }
 
 function parseTokens(source: string, position = 0, tokens = []): Token[] {
-  if (position >= input.length - 1) {
+  if (position >= source.length - 1) {
     return tokens
   }
   const token = parseToken(source, position)
@@ -30,18 +30,23 @@ function createTree(tokens: Token[], pos = 0, nodes = [], currentTag?: string): 
 
   const token = tokens[pos]
   if (token.type === 'open-tag') {
-    const { name, start } = token
+    const { name, attr } = token
     const content: ContentNode = createTree(tokens, pos + 1, [], name)
 
     if (content) {
-      const text = token.text + content.text
-      const node = { type: 'tag', name, content, text }
+      const {text} = content
+
+      const outerText = token.attr
+        ? `[${name}=${token.attr}]${text}[/${name}]`
+        : `[${name}]${text}[/${name}]`
+
+      const node = { type: 'tag', name, attr, content, text, outerText }
       return createTree(tokens, content.end + 1, nodes.concat([ node ]), currentTag)
     }
   }
   if (token.type === 'close-tag') {
     if (token.name === currentTag) {
-      const text = nodes.map(node => node.text).join('') + token.text
+      const text = nodes.map(node => node.outerText || node.text).join('')
       return { type: 'content', nodes, text, end: pos }
     }
   }
@@ -52,21 +57,28 @@ function createTree(tokens: Token[], pos = 0, nodes = [], currentTag?: string): 
 }
 
 export function renderNode(node: Node, tags: TagDefinition): string {
-  const { type } = node
-  if (type === 'text') {
+  if (node.type === 'text') {
     return node.text
   }
   else if (node.type === 'tag') {
-    const { render = identity, deep = true } = tags[node.name]
-    const content = deep ? renderNode(node.content, tags) : node.text
-    return render(content)
+    const { render = identity, deep } = tags[node.name] || {}
+    const content = deep === false ? node.text : renderNode(node.content, tags)
+    const output = render(content, node.attr, node.outerText)
+    return output
   }
-  else if (type === 'content' || type === 'tree') {
-    return node.nodes.map(renderNode).join('')
+  else if (node.type === 'content' || node.type === 'tree') {
+    return node.nodes.map(node => renderNode(node, tags)).join('')
+  }
+  else {
+    throw new Error(`Unknown node type ${node.type}. Node: ${node}`)
   }
 }
 
-export function parse(source: string): Node {
+export function toTree(source: string): Node {
   const tokens = parseTokens(source)
   return createTree(tokens)
+}
+
+export function toHTML(source: string, tags: TagDefinition): string {
+  return renderNode(toTree(source), tags)
 }
