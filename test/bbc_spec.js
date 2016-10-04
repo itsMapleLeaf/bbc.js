@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {createParser} from '../src'
+import {createParser, toTree} from '../src'
 
 const parse = createParser()
 
@@ -32,8 +32,62 @@ describe('parser', () => {
     )
   })
 
-  // TODO: test treegen
-  // TODO: test custom tags
-  // TODO: test unended tags
-  // TODO: test undefined tags
+  it('generates a syntax tree', () => {
+    expect(toTree('[b]bolded [i]italicbolded[/i][/b]')).to.deep.equal([
+      {
+        type: 'tag',
+        name: 'b',
+        attr: undefined,
+        innerText: 'bolded [i]italicbolded[/i]',
+        outerText: '[b]bolded [i]italicbolded[/i][/b]',
+        open: '[b]',
+        close: '[/b]',
+        children: [
+          {
+            type: 'text',
+            text: 'bolded ',
+          },
+          {
+            type: 'tag',
+            name: 'i',
+            attr: undefined,
+            innerText: 'italicbolded',
+            outerText: '[i]italicbolded[/i]',
+            open: '[i]',
+            close: '[/i]',
+            children: [
+              {
+                text: 'italicbolded',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      },
+    ])
+  })
+
+  it('allows custom tags', () => {
+    const parser = createParser({
+      awesome: { render: (text, attr) => attr ? `${text} is ${attr} awesome` : `${text} is awesome` },
+    })
+    expect(parser('[awesome]stuff[/awesome]')).to.equal('stuff is awesome')
+    expect(parser('[awesome=super]stuff[/awesome]')).to.equal('stuff is super awesome')
+  })
+
+  it('handles unending tags', () => {
+    compare(
+      '[b]bold [i]italic [url=http://google.com]link',
+      '<span class="bbc-b">bold <span class="bbc-i">italic <a class="bbc-url" href="http://google.com">link</a></span></span>'
+    )
+  })
+
+  it('handles undefined tags', () => {
+    compare(
+      '[what]???[/what]',
+      '[what]???[/what]'
+    )
+  })
+
+  // TODO: test case insensitivity
 })

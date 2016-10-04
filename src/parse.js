@@ -23,16 +23,14 @@ function parseTokens(source: string, position: number = 0, tokens: Token[] = [])
 }
 
 function createTree(tokens: Token[]): Node[] {
-  function getInnerText(children) {
-    return children.map(v => v.outerText || v.text).join('')
+  function getInnerText(nodes) {
+    return nodes.map(v => v.outerText || v.text).join('')
   }
 
   function collectChildren(pos, children, currentTag) {
     if (pos >= tokens.length) {
       if (currentTag) {
-        const innerText = getInnerText(children)
-        const outerText = currentTag.text + innerText
-        return [children, pos + 1, innerText, outerText]
+        return [children, pos + 1]
       }
       else {
         return [children]
@@ -42,16 +40,18 @@ function createTree(tokens: Token[]): Node[] {
     const token = tokens[pos]
 
     if (token.type === 'open-tag') {
-      const [tagChildren, next, outerText, innerText] = collectChildren(pos + 1, [], token)
+      const [tagChildren, next, endToken] = collectChildren(pos + 1, [], token)
       const { name, attr } = token
-      const node = { type: 'tag', name, attr, children: tagChildren, outerText, innerText }
+      const open = token.text
+      const close = endToken ? endToken.text : ''
+      const innerText = getInnerText(tagChildren)
+      const outerText = open + innerText + close
+      const node = { type: 'tag', name, attr, children: tagChildren, open, close, innerText, outerText }
       return collectChildren(next, children.concat([ node ]), currentTag)
     }
 
     if (token.type === 'close-tag' && token.name === currentTag.name) {
-      const innerText = getInnerText(children)
-      const outerText = currentTag.text + innerText + token.text
-      return [children, pos + 1, outerText, innerText]
+      return [children, pos + 1, token]
     }
 
     // render as a text node if other cases failed
@@ -74,7 +74,7 @@ export function renderNode(node: Node, tags: TagDefinition): string {
       const output = tag.render ? tag.render(innerText, node.attr, node.outerText) : innerText
       return output
     } else {
-      return node.children.map(node => renderNode(node, tags)).join('')
+      return node.open + node.children.map(node => renderNode(node, tags)).join('') + node.close
     }
   }
   else {
