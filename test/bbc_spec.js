@@ -34,4 +34,6 @@ describe('parser', () => {
 
   // TODO: test treegen
   // TODO: test custom tags
+  // TODO: test unended tags
+  // TODO: test undefined tags
 })
