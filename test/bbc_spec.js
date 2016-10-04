@@ -89,5 +89,10 @@ describe('parser', () => {
     )
   })
 
-  // TODO: test case insensitivity
+  it('is case insensitive', () => {
+    compare(
+      '[b]bold[/B]',
+      '<span class="bbc-b">bold</span>'
+    )
+  })
 })

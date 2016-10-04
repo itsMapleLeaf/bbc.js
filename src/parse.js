@@ -3,9 +3,9 @@ import {newTokenMatcher} from './util'
 
 const identity = value => value
 
-const parseOpenTag = newTokenMatcher('open-tag', /\[([a-z]+?)(?:=(.+?))?]/i, (name, attr) => ({ name, attr }))
-const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-z]+?)]/i, name => ({ name }))
-const parseText = newTokenMatcher('text', /(\[*[^\[]+)/i, () => ({}))
+const parseOpenTag = newTokenMatcher('open-tag', /\[([a-zA-Z]+?)(?:=(.+?))?]/, (name, attr) => ({ name: name.toLowerCase(), attr }))
+const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-zA-Z]+?)]/, name => ({ name: name.toLowerCase() }))
+const parseText = newTokenMatcher('text', /(\[*[^\[]+)/, () => ({}))
 
 function parseToken(input: string, position: number): Token {
   const token = parseOpenTag(input, position)
