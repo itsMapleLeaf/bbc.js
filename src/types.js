@@ -34,15 +34,11 @@ export type ContentNode = {
   end: number,
 }
 
-export type Node
-  = TreeNode
-  | TagNode
-  | ContentNode
-  | TextNode
+export type Node = TreeNode | TagNode | ContentNode | TextNode
 
 export type TagDefinition = {
   [tag: string]: {
-    render: (text: string, attr: ?string, outerText: string) => string,
+    render?: (text: string, attr: ?string, outerText: string) => string,
     deep?: boolean,
   }
 }

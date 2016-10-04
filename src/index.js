@@ -29,11 +29,11 @@ const defaultTags = {
 function createParser(tags: TagDefinition = {}) {
   tags = Object.assign({}, defaultTags, tags)
   return {
-    tree (source) {
+    tree (source: string) {
       const tokens = parser.parseTokens(source)
       return parser.createTree(tokens)
     },
-    parse (source) {
+    parse (source: string) {
       const tree = this.tree(source)
       return parser.renderNodeList(tree, tags)
     },

@@ -1,7 +1,6 @@
-import type {Token, TreeNode, TagNode, TagDefinition} from './types'
+// @flow
+import type {Token, TagDefinition} from './types'
 import {newTokenMatcher} from './util'
-
-const identity = value => value
 
 const parseOpenTag = newTokenMatcher('open-tag', /\[([a-zA-Z]+?)(?:=(.+?))?]/, (name, attr) => ({ name: name.toLowerCase(), attr }))
 const parseCloseTag = newTokenMatcher('close-tag', /\[\/([a-zA-Z]+?)]/, name => ({ name: name.toLowerCase() }))
@@ -23,27 +22,23 @@ function parseTokens(source: string, position: number = 0, tokens: Token[] = [])
 }
 
 function createTree(tokens: Token[]): Node[] {
-  function getInnerText(nodes) {
-    return nodes.map(v => v.outerText || v.text).join('')
+  function getInnerText(nodes: Node[]): string {
+    return nodes.map(v => v.outerText || v.text || '').join('')
   }
 
-  function collectChildren(pos, children, currentTag) {
+  function collectChildren(pos: number, children: Node[], currentTag?: Token): [Node[], number, ?Token] {
     if (pos >= tokens.length) {
-      if (currentTag) {
-        return [children, pos + 1]
-      }
-      else {
-        return [children]
-      }
+      return [children, pos + 1]
     }
 
     const token = tokens[pos]
 
     if (token.type === 'open-tag') {
-      const [tagChildren, next, endToken] = collectChildren(pos + 1, [], token)
+      const [tagChildren, next, endToken = {}] = collectChildren(pos + 1, [], token)
+
       const { name, attr } = token
       const open = token.text
-      const close = endToken ? endToken.text : ''
+      const close = endToken.text ? endToken.text : ''
       const innerText = getInnerText(tagChildren)
       const outerText = open + innerText + close
       const node = { type: 'tag', name, attr, children: tagChildren, open, close, innerText, outerText }
@@ -74,7 +69,7 @@ function renderNode(node: Node, tags: TagDefinition): string {
       const output = tag.render ? tag.render(innerText, node.attr, node.outerText) : innerText
       return output
     } else {
-      return node.open + renderNodeList(node.children) + node.close
+      return node.open + renderNodeList(node.children, tags) + node.close
     }
   }
   else {
@@ -82,7 +77,7 @@ function renderNode(node: Node, tags: TagDefinition): string {
   }
 }
 
-function renderNodeList(nodeList, tags) {
+function renderNodeList(nodeList: Node[], tags: TagDefinition) {
   return nodeList.map(node => renderNode(node, tags)).join('')
 }
 
