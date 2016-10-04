@@ -1,5 +1,5 @@
 // @flow
-import {toTree, toHTML} from './parse'
+import * as parser from './parse'
 import type {TagDefinition} from './types'
 
 const defaultTags = {
@@ -26,10 +26,18 @@ const defaultTags = {
   },
 }
 
-function createParser(tags: TagDefinition = defaultTags) {
-  return (source: string) => {
-    return toHTML(source, tags)
+function createParser(tags: TagDefinition = {}) {
+  tags = Object.assign({}, defaultTags, tags)
+  return {
+    tree (source) {
+      const tokens = parser.parseTokens(source)
+      return parser.createTree(tokens)
+    },
+    parse (source) {
+      const tree = this.tree(source)
+      return parser.renderNodeList(tree, tags)
+    },
   }
 }
 
-export { createParser, toTree, toHTML }
+export { createParser }

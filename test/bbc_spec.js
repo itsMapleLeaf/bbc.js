@@ -1,10 +1,10 @@
 import {expect} from 'chai'
-import {createParser, toTree} from '../src'
+import {createParser} from '../src'
 
-const parse = createParser()
+const parser = createParser()
 
 function compare(input, output) {
-  expect(parse(input)).to.equal(output)
+  expect(parser.parse(input)).to.equal(output)
 }
 
 /* eslint no-undef: off */
@@ -33,7 +33,7 @@ describe('parser', () => {
   })
 
   it('generates a syntax tree', () => {
-    expect(toTree('[b]bolded [i]italicbolded[/i][/b]')).to.deep.equal([
+    expect(parser.tree('[b]bolded [i]italicbolded[/i][/b]')).to.deep.equal([
       {
         type: 'tag',
         name: 'b',
@@ -71,8 +71,8 @@ describe('parser', () => {
     const parser = createParser({
       awesome: { render: (text, attr) => attr ? `${text} is ${attr} awesome` : `${text} is awesome` },
     })
-    expect(parser('[awesome]stuff[/awesome]')).to.equal('stuff is awesome')
-    expect(parser('[awesome=super]stuff[/awesome]')).to.equal('stuff is super awesome')
+    expect(parser.parse('[awesome]stuff[/awesome]')).to.equal('stuff is awesome')
+    expect(parser.parse('[awesome=super]stuff[/awesome]')).to.equal('stuff is super awesome')
   })
 
   it('handles unending tags', () => {

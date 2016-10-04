@@ -63,7 +63,7 @@ function createTree(tokens: Token[]): Node[] {
   return children
 }
 
-export function renderNode(node: Node, tags: TagDefinition): string {
+function renderNode(node: Node, tags: TagDefinition): string {
   if (node.type === 'text') {
     return node.text
   }
@@ -74,7 +74,7 @@ export function renderNode(node: Node, tags: TagDefinition): string {
       const output = tag.render ? tag.render(innerText, node.attr, node.outerText) : innerText
       return output
     } else {
-      return node.open + node.children.map(node => renderNode(node, tags)).join('') + node.close
+      return node.open + renderNodeList(node.children) + node.close
     }
   }
   else {
@@ -82,12 +82,8 @@ export function renderNode(node: Node, tags: TagDefinition): string {
   }
 }
 
-export function toTree(source: string): Node {
-  const tokens = parseTokens(source)
-  return createTree(tokens)
+function renderNodeList(nodeList, tags) {
+  return nodeList.map(node => renderNode(node, tags)).join('')
 }
 
-export function toHTML(source: string, tags: TagDefinition): string {
-  const nodes = toTree(source)
-  return nodes.map(node => renderNode(node, tags)).join('')
-}
+export { parseTokens, createTree, renderNode, renderNodeList }
