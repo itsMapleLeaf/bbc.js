@@ -19,5 +19,4 @@ rules:
     - error
     - never
   comma-dangle:
-    - warn
-    - always-multiline
+    - off
