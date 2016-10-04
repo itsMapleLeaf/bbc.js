@@ -3,14 +3,16 @@ import {toTree, toHTML} from './parse'
 import type {TagDefinition} from './types'
 
 const defaultTags = {
-  b: { render: text => `<span class="bbc-b" style="font-weight: bold">${text}</span>` },
-  i: { render: text => `<span class="bbc-i" style="font-style: italic">${text}</span>` },
-  u: { render: text => `<span class="bbc-u" style="text-decoration: underline">${text}</span>` },
-  s: { render: text => `<span class="bbc-s" style="text-decoration: line-through">${text}</span>` },
+  b: { render: text => `<span class="bbc-b">${text}</span>` },
+  i: { render: text => `<span class="bbc-i">${text}</span>` },
+  u: { render: text => `<span class="bbc-u">${text}</span>` },
+  s: { render: text => `<span class="bbc-s">${text}</span>` },
+  sup: { render: text => `<span class="bbc-sup">${text}</span>` },
+  sub: { render: text => `<span class="bbc-sub">${text}</span>` },
   color: {
     render: (text, color) => (
       color
-        ? `<span class="bbc-color bbc-color-${color}" style="color: ${color}">${text}</span>`
+        ? `<span class="bbc-color bbc-color-${color}">${text}</span>`
         : text
     ),
   },

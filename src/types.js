@@ -10,15 +10,20 @@ export type Token
 
 export type TreeNode = {
   type: 'tree',
-  nodes: Node[],
+  children: Node[],
+}
+
+export type TextNode = {
+  type: 'text',
+  text: string,
 }
 
 export type TagNode = {
   type: 'tag',
   name: string,
   attr?: string,
-  content: ContentNode,
-  text: string,
+  children: Node[],
+  innerText: string,
   outerText: string,
 }
 
@@ -27,10 +32,6 @@ export type ContentNode = {
   nodes: Node[],
   text: string,
   end: number,
-}
-export type TextNode = {
-  type: 'text',
-  text: string,
 }
 
 export type Node

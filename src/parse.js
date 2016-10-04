@@ -1,5 +1,4 @@
-// @flow
-import type {Token, Node, ContentNode, TagDefinition} from './types'
+import type {Token, TreeNode, TagNode, TagDefinition} from './types'
 import {newTokenMatcher} from './util'
 
 const identity = value => value
@@ -15,7 +14,7 @@ function parseToken(input: string, position: number): Token {
   return token
 }
 
-function parseTokens(source: string, position = 0, tokens = []): Token[] {
+function parseTokens(source: string, position: number = 0, tokens: Token[] = []): Token[] {
   if (position >= source.length - 1) {
     return tokens
   }
@@ -23,37 +22,45 @@ function parseTokens(source: string, position = 0, tokens = []): Token[] {
   return parseTokens(source, token.end, tokens.concat([token]))
 }
 
-function createTree(tokens: Token[], pos = 0, nodes = [], currentTag?: string): Node {
-  if (pos >= tokens.length) {
-    return { type: 'tree', nodes }
+function createTree(tokens: Token[]): Node[] {
+  function getInnerText(children) {
+    return children.map(v => v.outerText || v.text).join('')
   }
 
-  const token = tokens[pos]
-  if (token.type === 'open-tag') {
-    const { name, attr } = token
-    const content: ContentNode = createTree(tokens, pos + 1, [], name)
-
-    if (content) {
-      const {text} = content
-
-      const outerText = token.attr
-        ? `[${name}=${token.attr}]${text}[/${name}]`
-        : `[${name}]${text}[/${name}]`
-
-      const node = { type: 'tag', name, attr, content, text, outerText }
-      return createTree(tokens, content.end + 1, nodes.concat([ node ]), currentTag)
+  function collectChildren(pos, children, currentTag) {
+    if (pos >= tokens.length) {
+      if (currentTag) {
+        const innerText = getInnerText(children)
+        const outerText = currentTag.text + innerText
+        return [children, pos + 1, innerText, outerText]
+      }
+      else {
+        return [children]
+      }
     }
-  }
-  if (token.type === 'close-tag') {
-    if (token.name === currentTag) {
-      const text = nodes.map(node => node.outerText || node.text).join('')
-      return { type: 'content', nodes, text, end: pos }
+
+    const token = tokens[pos]
+
+    if (token.type === 'open-tag') {
+      const [tagChildren, next, outerText, innerText] = collectChildren(pos + 1, [], token)
+      const { name, attr } = token
+      const node = { type: 'tag', name, attr, children: tagChildren, outerText, innerText }
+      return collectChildren(next, children.concat([ node ]), currentTag)
     }
+
+    if (token.type === 'close-tag' && token.name === currentTag.name) {
+      const innerText = getInnerText(children)
+      const outerText = currentTag.text + innerText + token.text
+      return [children, pos + 1, outerText, innerText]
+    }
+
+    // render as a text node if other cases failed
+    const node = { type: 'text', text: token.text }
+    return collectChildren(pos + 1, children.concat([ node ]), currentTag)
   }
 
-  // render as a text node if other cases failed
-  const node = { type: 'text', text: token.text }
-  return createTree(tokens, pos + 1, nodes.concat([ node ]), currentTag)
+  const [children] = collectChildren(0, [])
+  return children
 }
 
 export function renderNode(node: Node, tags: TagDefinition): string {
@@ -61,16 +68,17 @@ export function renderNode(node: Node, tags: TagDefinition): string {
     return node.text
   }
   else if (node.type === 'tag') {
-    const { render = identity, deep } = tags[node.name] || {}
-    const content = deep === false ? node.text : renderNode(node.content, tags)
-    const output = render(content, node.attr, node.outerText)
-    return output
-  }
-  else if (node.type === 'content' || node.type === 'tree') {
-    return node.nodes.map(node => renderNode(node, tags)).join('')
+    const tag = tags[node.name]
+    if (tag != null) {
+      const innerText = tag.deep === false ? node.innerText : node.children.map(node => renderNode(node, tags)).join('')
+      const output = tag.render ? tag.render(innerText, node.attr, node.outerText) : innerText
+      return output
+    } else {
+      return node.children.map(node => renderNode(node, tags)).join('')
+    }
   }
   else {
-    throw new Error(`Unknown node type ${node.type}. Node: ${node}`)
+    throw new Error(`Unknown node type ${node.type}. ${node}`)
   }
 }
 
@@ -80,5 +88,6 @@ export function toTree(source: string): Node {
 }
 
 export function toHTML(source: string, tags: TagDefinition): string {
-  return renderNode(toTree(source), tags)
+  const nodes = toTree(source)
+  return nodes.map(node => renderNode(node, tags)).join('')
 }

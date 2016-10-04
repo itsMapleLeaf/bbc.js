@@ -10,8 +10,8 @@ function compare(input, output) {
 /* eslint no-undef: off */
 describe('parser', () => {
   it('parses bbc', () => {
-    compare('[b]hello[/b]', '<span class="bbc-b" style="font-weight: bold">hello</span>')
-    compare('[i]world[/i]', '<span class="bbc-i" style="font-style: italic">world</span>')
+    compare('[b]hello[/b]', '<span class="bbc-b">hello</span>')
+    compare('[i]world[/i]', '<span class="bbc-i">world</span>')
   })
 
   it('parses complex bbc w/ params', () => {
@@ -21,14 +21,14 @@ describe('parser', () => {
   it('supports nesting', () => {
     compare(
       '[color=red]foo [color=blue]bar[/color] [color=green]foobar[/color][/color]',
-      '<span class="bbc-color bbc-color-red" style="color: red">foo <span class="bbc-color bbc-color-blue" style="color: blue">bar</span> <span class="bbc-color bbc-color-green" style="color: green">foobar</span></span>'
+      '<span class="bbc-color bbc-color-red">foo <span class="bbc-color bbc-color-blue">bar</span> <span class="bbc-color bbc-color-green">foobar</span></span>'
     )
   })
 
   it('supports nobbc', () => {
     compare(
       '[nobbc][url=http://google.com]hi mom[/url][/nobbc] [u]hi dad[/u]',
-      '[url=http://google.com]hi mom[/url] <span class="bbc-u" style="text-decoration: underline">hi dad</span>'
+      '[url=http://google.com]hi mom[/url] <span class="bbc-u">hi dad</span>'
     )
   })
 
