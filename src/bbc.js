@@ -1,7 +1,7 @@
 'use strict'
 
-const START_TAG = /^\[([a-z]+)(?:=([^[]+))?\]/
-const END_TAG = /^\[\/([a-z]+)\]/
+const START_TAG = /^\[([a-z]+)(?:=([^[]+))?\]/i
+const END_TAG = /^\[\/([a-z]+)\]/i
 
 function collectText (input) {
   if (input.length < 1) return ''
