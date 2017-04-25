@@ -16,6 +16,6 @@
     "prettier-eslint": "^6.1.0"
   },
   "scripts": {
-    "test": "ava"
+    "test": "ava spec/*"
   }
 }

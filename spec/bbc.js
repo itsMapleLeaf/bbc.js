@@ -1,5 +1,5 @@
 const test = require('ava')
-const bbc = require('./index')
+const bbc = require('../src/bbc')
 
 test('matching tags', t => {
   t.deepEqual(bbc.tokenize(`[b]hello[/b] [i]world[/i] foobar`), [
