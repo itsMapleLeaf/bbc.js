@@ -83,8 +83,20 @@ function parse (tokens) {
   return createTree(tokens)
 }
 
-function parseBBC (text) {
-  return parse(tokenize(text))
+function render (node) {
+  if (node.type === 'text') {
+    return node.text
+  } else if (node.type === 'tag-pair') {
+    return `<${node.tag}>${node.children.map(render).join('')}</${node.tag}>`
+  }
 }
 
-module.exports = {tokenize, parseBBC}
+function parseBBC (bbc) {
+  return parse(tokenize(bbc))
+}
+
+function renderBBC (bbc) {
+  return parseBBC(bbc).map(render).join('')
+}
+
+module.exports = {tokenize, parseBBC, renderBBC}

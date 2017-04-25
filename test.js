@@ -94,3 +94,7 @@ test('parsing unclosed tags', t => {
     },
   ])
 })
+
+test('rendering', t => {
+  t.is(bbc.renderBBC('[b]foo[/b] [i]bar[/i]'), '<b>foo</b> <i>bar</i>')
+})
