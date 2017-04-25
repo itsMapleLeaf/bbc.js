@@ -83,9 +83,9 @@ function parse (tokens) {
   return createTree(tokens)
 }
 
-function defaultRenderer (content, tag, param) {
-  if (param != null) return `[${tag}=${param}]${content}[/${tag}]`
-  return `[${tag}]${content}[/${tag}]`
+function defaultRenderer (text, param, tag) {
+  if (param != null) return `[${tag}=${param}]${text}[/${tag}]`
+  return `[${tag}]${text}[/${tag}]`
 }
 
 function renderNode (node, tagset) {
@@ -96,7 +96,7 @@ function renderNode (node, tagset) {
       .map(child => renderNode(child, tagset))
       .join('')
     const renderer = tagset[node.tag] || defaultRenderer
-    return renderer(content, node.tag, node.param)
+    return renderer(content, node.param, node.tag)
   }
 }
 
@@ -110,14 +110,14 @@ function renderBBC (bbc, tagset = {}) {
 
 const tags = {
   common: {
-    b: content => `<strong>${content}</strong>`,
-    i: content => `<em>${content}</em>`,
-    u: content => `<u>${content}</u>`,
-    img: content => `<img src="${content}">`,
-    sup: content => `<sup>${content}</sup>`,
-    sub: content => `<sub>${content}</sub>`,
-    big: content => `<big>${content}</big>`,
-    small: content => `<small>${content}</small>`,
+    b: text => `<strong>${text}</strong>`,
+    i: text => `<em>${text}</em>`,
+    u: text => `<u>${text}</u>`,
+    img: text => `<img src="${text}">`,
+    sup: text => `<sup>${text}</sup>`,
+    sub: text => `<sub>${text}</sub>`,
+    big: text => `<big>${text}</big>`,
+    small: text => `<small>${text}</small>`,
   },
 }
 
