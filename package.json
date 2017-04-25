@@ -7,6 +7,9 @@
   "license": "MIT",
   "devDependencies": {
     "ava": "^0.19.1",
+    "babel-cli": "^6.24.1",
+    "babel-preset-babili": "^0.0.12",
+    "babel-preset-env": "^1.4.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.2.0",
@@ -16,6 +19,9 @@
     "prettier-eslint": "^6.1.0"
   },
   "scripts": {
+    "build:dev": "babel src/bbc.js -o dist/bbc.js --source-maps",
+    "build:min": "babel src/bbc.js -o dist/bbc.min.js --source-maps --presets babili",
+    "build": "npm run build:dev && npm run build:min",
     "test": "ava spec/*"
   }
 }

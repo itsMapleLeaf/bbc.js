@@ -1,4 +1,7 @@
 node_modules/
+src/
+spec/
+.eslintignore
 .eslintrc.yml
-test.js
+.babelrc
 yarn.lock
