@@ -83,8 +83,8 @@ function parse (tokens) {
   return createTree(tokens)
 }
 
-function parseText (text) {
+function parseBBC (text) {
   return parse(tokenize(text))
 }
 
-module.exports = {tokenize, parseText}
+module.exports = {tokenize, parseBBC}

@@ -23,15 +23,15 @@ test('matching tag params', t => {
 })
 
 test('parsing a single text node', t => {
-  t.deepEqual(bbc.parseText('foo bar'), [{type: 'text', text: 'foo bar'}])
+  t.deepEqual(bbc.parseBBC('foo bar'), [{type: 'text', text: 'foo bar'}])
 })
 
 test('parsing unmatched end tags as text', t => {
-  t.deepEqual(bbc.parseText('[/foo][/bar]'), [
+  t.deepEqual(bbc.parseBBC('[/foo][/bar]'), [
     {type: 'text', text: '[/foo]'},
     {type: 'text', text: '[/bar]'},
   ])
-  t.deepEqual(bbc.parseText('[/foo] test [/bar]'), [
+  t.deepEqual(bbc.parseBBC('[/foo] test [/bar]'), [
     {type: 'text', text: '[/foo]'},
     {type: 'text', text: ' test '},
     {type: 'text', text: '[/bar]'},
@@ -39,7 +39,7 @@ test('parsing unmatched end tags as text', t => {
 })
 
 test('parsing flat tag pairs', t => {
-  t.deepEqual(bbc.parseText('[b]foo[/b] [color=red]bar[/color]'), [
+  t.deepEqual(bbc.parseBBC('[b]foo[/b] [color=red]bar[/color]'), [
     {
       type: 'tag-pair',
       tag: 'b',
@@ -60,7 +60,7 @@ test('parsing flat tag pairs', t => {
 })
 
 test('parsing nesty tag pairs', t => {
-  t.deepEqual(bbc.parseText('[foo][bar]test[/bar][/foo]'), [
+  t.deepEqual(bbc.parseBBC('[foo][bar]test[/bar][/foo]'), [
     {
       type: 'tag-pair',
       tag: 'foo',
@@ -78,7 +78,7 @@ test('parsing nesty tag pairs', t => {
 })
 
 test('parsing unclosed tags', t => {
-  t.deepEqual(bbc.parseText('[foo][bar]test'), [
+  t.deepEqual(bbc.parseBBC('[foo][bar]test'), [
     {
       type: 'tag-pair',
       tag: 'foo',
