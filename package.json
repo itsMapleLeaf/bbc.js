@@ -1,6 +1,6 @@
 {
   "name": "bbc.js",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "a small, flexible bbc parser for JavaScript",
   "main": "dist/bbc.min.js",
   "author": "just nobody",
