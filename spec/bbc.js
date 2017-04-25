@@ -112,3 +112,10 @@ test('mixed case tags', t => {
     '<strong>foo</strong> <em>bar</em>'
   )
 })
+
+test('rendering nested tags', t => {
+  t.is(
+    bbc.renderBBC('[b][i]hello world[/i][/b]', bbc.tags.common),
+    `<strong><em>hello world</em></strong>`
+  )
+})

@@ -92,7 +92,9 @@ function renderNode (node, tagset) {
   if (node.type === 'text') {
     return node.text
   } else if (node.type === 'tag-pair') {
-    const content = node.children.map(renderNode).join('')
+    const content = node.children
+      .map(child => renderNode(child, tagset))
+      .join('')
     const renderer = tagset[node.tag] || defaultRenderer
     return renderer(content, node.tag, node.param)
   }
