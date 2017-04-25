@@ -105,3 +105,10 @@ test('configured rendering', t => {
     '<strong>foo</strong> <em>bar</em>'
   )
 })
+
+test('capital letters', t => {
+  t.is(
+    bbc.renderBBC('[B]foo[/b] [I]bar[/i]', bbc.tags.common),
+    '<strong>foo</strong> <em>bar</em>'
+  )
+})

@@ -11,12 +11,12 @@ function collectText (input) {
 
 function matchStartTag (input) {
   const [text, tag, param = null] = input.match(START_TAG) || []
-  if (text) return {type: 'start-tag', text, tag, param}
+  if (text) return {type: 'start-tag', text, tag: tag.toLowerCase(), param}
 }
 
 function matchEndTag (input) {
   const [text, tag] = input.match(END_TAG) || []
-  if (text) return {type: 'end-tag', text, tag}
+  if (text) return {type: 'end-tag', text, tag: tag.toLowerCase()}
 }
 
 function matchText (input) {
