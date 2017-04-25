@@ -95,6 +95,13 @@ test('parsing unclosed tags', t => {
   ])
 })
 
-test('rendering', t => {
-  t.is(bbc.renderBBC('[b]foo[/b] [i]bar[/i]'), '<b>foo</b> <i>bar</i>')
+test('unconfigured rendering', t => {
+  t.is(bbc.renderBBC('[b]foo[/b] [i]bar[/i]'), '[b]foo[/b] [i]bar[/i]')
+})
+
+test('configured rendering', t => {
+  t.is(
+    bbc.renderBBC('[b]foo[/b] [i]bar[/i]', bbc.tags.common),
+    '<strong>foo</strong> <em>bar</em>'
+  )
 })
