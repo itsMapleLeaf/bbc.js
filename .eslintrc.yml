@@ -1,0 +1,8 @@
+extends: standard
+plugins:
+  - standard
+  - promise
+rules:
+  comma-dangle:
+    - warn
+    - only-multiline
