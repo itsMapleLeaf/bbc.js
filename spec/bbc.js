@@ -106,7 +106,7 @@ test('configured rendering', t => {
   )
 })
 
-test('capital letters', t => {
+test('mixed case tags', t => {
   t.is(
     bbc.renderBBC('[B]foo[/b] [I]bar[/i]', bbc.tags.common),
     '<strong>foo</strong> <em>bar</em>'
