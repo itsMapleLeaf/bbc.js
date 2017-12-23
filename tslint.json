@@ -1,0 +1,9 @@
+{
+  "defaultSeverity": "warning",
+  "extends": ["tslint-config-xo", "tslint-config-prettier"],
+  "rules": {
+    "ordered-imports": true,
+    "no-empty": false,
+    "comment-format": false
+  }
+}
